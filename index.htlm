@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>かけ算？わり算？ゲーム</title>
+
+<style>
+body{
+    font-family:sans-serif;
+    text-align:center;
+    background:#f0f8ff;
+    margin:0;
+    padding:20px;
+}
+
+h1{
+    color:#1976d2;
+}
+
+#game{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+button{
+    font-size:24px;
+    padding:12px 25px;
+    margin:10px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.choice{
+    background:#4caf50;
+    color:white;
+}
+
+.mode{
+    background:#2196f3;
+    color:white;
+}
+
+#question{
+    font-size:28px;
+    margin:25px 0;
+}
+
+#message{
+    font-size:24px;
+    margin:15px;
+    min-height:40px;
+}
+
+#score{
+    font-size:22px;
+    margin-bottom:15px;
+}
+
+input{
+    font-size:24px;
+    width:120px;
+    text-align:center;
+    padding:5px;
+}
+
+#answerArea{
+    display:none;
+}
+
+#gameArea{
+    display:none;
+}
+
+.correct{
+    color:green;
+    font-weight:bold;
+}
+
+.wrong{
+    color:red;
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<h1>かけ算？わり算？ゲーム</h1>
+
+<div id="game">
+
+<div id="modeArea">
+<h2>モードを選ぼう</h2>
+
+<button class="mode" onclick="startGame('same')">
+同じ数字モード
+</button>
+
+<button class="mode" onclick="startGame('random')">
+ランダムモード
+</button>
+</div>
+
+<div id="gameArea">
+
+<div id="score">
+問題 1 / 10
+</div>
+
+<div id="question"></div>
+
+<div id="operationArea">
+<button class="choice" onclick="chooseOperation('×')">×</button>
+<button class="choice" onclick="chooseOperation('÷')">÷</button>
+</div>
+
+<div id="answerArea">
+<p id="calcQuestion"></p>
+
+<input id="answerInput" type="number">
+
+<br><br>
+
+<button onclick="checkAnswer()">
+答える
+</button>
+</div>
+
+<div id="message"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let mode="";
+let questionCount=0;
+let score=0;
+
+let currentOperation="";
+let correctOperation="";
+let correctAnswer=0;
+
+function startGame(selectedMode){
+
+mode=selectedMode;
+
+questionCount=0;
+score=0;
+
+document.getElementById("modeArea").style.display="none";
+document.getElementById("gameArea").style.display="block";
+
+nextQuestion();
+}
+
+function rand(min,max){
+return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function nextQuestion(){
+
+if(questionCount>=10){
+
+document.getElementById("gameArea").innerHTML=
+`
+<h2>ゲーム終了！</h2>
+<h1>${score} / 10 問正解</h1>
+<button onclick="location.reload()">
+もう一度遊ぶ
+</button>
+`;
+
+return;
+}
+
+questionCount++;
+
+document.getElementById("score").textContent=
+`問題 ${questionCount} / 10`;
+
+document.getElementById("message").textContent="";
+
+document.getElementById("operationArea").style.display="block";
+document.getElementById("answerArea").style.display="none";
+
+document.getElementById("answerInput").value="";
+
+generateQuestion();
+}
+
+function generateQuestion(){
+
+if(mode==="same"){
+
+let a=rand(2,9);
+let b=rand(2,9);
+let c=a*b;
+
+if(Math.random()<0.5){
+
+correctOperation="×";
+correctAnswer=c;
+
+document.getElementById("question").textContent=
+`${a}人に ${b}個ずつ あげます。全部で何個ですか？`;
+
+currentOperation=`${a} × ${b}`;
+
+}else{
+
+correctOperation="÷";
+correctAnswer=b;
+
+document.getElementById("question").textContent=
+`${c}個のお菓子を ${a}人で同じ数ずつ分けます。1人何個ですか？`;
+
+currentOperation=`${c} ÷ ${a}`;
+}
+
+}else{
+
+let a=rand(2,9);
+let b=rand(2,9);
+
+if(Math.random()<0.5){
+
+correctOperation="×";
+correctAnswer=a*b;
+
+document.getElementById("question").textContent=
+`${a}人に ${b}個ずつ配ります。全部で何個ですか？`;
+
+currentOperation=`${a} × ${b}`;
+
+}else{
+
+let total=a*b;
+
+correctOperation="÷";
+correctAnswer=b;
+
+document.getElementById("question").textContent=
+`${total}個のボールを ${a}人で同じ数ずつ分けます。1人何個ですか？`;
+
+currentOperation=`${total} ÷ ${a}`;
+}
+}
+
+}
+
+function chooseOperation(op){
+
+if(op===correctOperation){
+
+document.getElementById("message").innerHTML=
+'<span class="correct">○ 演算の選択正解！</span>';
+
+document.getElementById("operationArea").style.display="none";
+
+document.getElementById("answerArea").style.display="block";
+
+document.getElementById("calcQuestion").textContent=
+currentOperation + " = ?";
+
+}else{
+
+document.getElementById("message").innerHTML=
+'<span class="wrong">× 演算が違います</span>';
+
+setTimeout(nextQuestion,1200);
+}
+}
+
+function checkAnswer(){
+
+let value=
+Number(document.getElementById("answerInput").value);
+
+if(value===correctAnswer){
+
+score++;
+
+document.getElementById("message").innerHTML=
+'<span class="correct">◎ 正解！</span>';
+
+}else{
+
+document.getElementById("message").innerHTML=
+`<span class="wrong">
+× 不正解<br>
+正解は ${correctAnswer}
+</span>`;
+}
+
+setTimeout(nextQuestion,1500);
+}
+
+</script>
+
+</body>
+</html>
